@@ -107,16 +107,16 @@ public class Game {
 
     private void actualizar(double delta) {
         // input
-        if (keys.contains(KeyCode.LEFT)) jugador.moverIzquierda();
-        if (keys.contains(KeyCode.RIGHT)) jugador.moverDerecha();
-        if (keys.contains(KeyCode.SPACE)) jugador.saltar();
+            if (keys.contains(KeyCode.LEFT)) jugador.moverIzquierda();
+            if (keys.contains(KeyCode.RIGHT)) jugador.moverDerecha();
+            if (keys.contains(KeyCode.SPACE)) jugador.saltar();
       //  if (e.getCode() == KeyCode.Z) jugador.startChargingJump();
 
         // update entities
         for (Entidad en : entidades) en.update();
 
         // gravedad & plataformas collision for player
-        jugador.applyGravity();
+       // jugador.applyGravity();
         boolean onPlatform = false;
         for (Plataforma p : plataformas) {
             if (jugador.getBounds().intersects(p.getBounds())) {

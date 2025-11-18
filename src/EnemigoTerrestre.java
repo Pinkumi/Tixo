@@ -11,16 +11,16 @@ public class EnemigoTerrestre extends Enemigo {
 
     @Override
     public void update() {
-        x += velX;
-        if (x < 0 || x + width > 800) velX *= -1;
+        pos.x += vel.x;
+        if (pos.x < 0 || pos.x + width > 800) vel.x *= -1;
     }
 
     @Override
     public void draw(GraphicsContext gc) {
-        if (sprite != null) gc.drawImage(sprite, x, y, width, height);
+        if (sprite != null) gc.drawImage(sprite, pos.x, pos.y, width, height);
         else {
             gc.setFill(Color.RED);
-            gc.fillRect(x,y,width,height);
+            gc.fillRect(pos.x, pos.y, width, height);
         }
     }
 }

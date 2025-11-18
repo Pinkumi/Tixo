@@ -4,17 +4,16 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 public class Jugador extends Entidad {
-    private double velY = 0;
-    private double velX = 0;
     private boolean enSuelo = false;
     private int puntaje = 0;
     private boolean vivo = true;
     private Image sprite;
     private boolean chargingJump = false;
     private double chargePower = 0;
-    private final double MAX_CHARGE = 15;
+    private final double MAX_CHARGE = 10;
     private boolean lookingRight = true;
-
+    private int jumpImpulse = 0;
+    private boolean chargeJumpDirectionRight = true;
 
     public Jugador(double x, double y, double width, double height) {
         super(x,y,width,height);
@@ -25,60 +24,73 @@ public class Jugador extends Entidad {
     public void startChargingJump() {
         if (enSuelo) {
             chargingJump = true;
+            if(lookingRight) chargeJumpDirectionRight = true;
+            else chargeJumpDirectionRight = false;
             chargePower = 0;
         }
     }
 
     public void releaseChargedJump() {
         chargingJump = false;
-        velY = -5-chargePower;
-        if (lookingRight) velX += chargePower * 2;
-        else velX -= chargePower * 2;
         enSuelo = false;
+        vel.y =-(5+ chargePower);
+        if(chargeJumpDirectionRight) vel.x += chargePower*1.5;
+        else vel.x -= chargePower*1.5;
         chargePower = 0;
     }
 
     public void moverIzquierda() { 
-        x -= 5; if (x < 0) x = 0;
+        acc.x -= 1;
         lookingRight = false;
      }
     public void moverDerecha() { 
-        x += 5; 
-        if (x + width > 800) x = 800 - width; 
+        acc.x += 1; 
         lookingRight = true;
     }
-    public void saltar() { if (enSuelo) { velY = -10; enSuelo = false; } }
+    public void saltar() {  if(enSuelo) { vel.y = -10; enSuelo = false; } }
 
     public void applyGravity() {
-        velY += 0.5;
-        y += velY;
-        if (y > 1000) { vivo = false; }
+        acc.y = 0.5;
+        if (pos.y > 1000) { vivo = false; }
     }
 
     public void landOn(Plataforma p) {
-        y = p.getY() - height;
-        velY = 0;
+        pos.y = p.getY() - height;
+        vel.y = 0;
         enSuelo = true;
     }
 
     @Override
     public void update() {
+        
+        applyGravity();
+        // if (jumpImpulse > 0) {
+        //     if (chargeJumpDirectionRight) acc.x += jumpImpulse;
+        //     else acc.x -= jumpImpulse;
+        //     jumpImpulse--;
+        // }
+        vel.add(acc);
+        pos.add(vel);
+        acc.set(0,0);
+        if(enSuelo)vel.x *= 0.8;
+        else vel.x *= 0.99;
+        
+
+        if (pos.x + width > 800) pos.x = 800 - width;
+        if (pos.x < 0) pos.x = 0;
         if(chargingJump){
             chargePower +=0.3;
-            if(chargePower>MAX_CHARGE){
-                chargePower=MAX_CHARGE;
-                System.out.println(chargePower);
-            }
+            if(chargePower>MAX_CHARGE)chargePower=MAX_CHARGE;System.out.println(chargePower);
         } 
     }
 
     @Override
     public void draw(GraphicsContext gc) {
         if (sprite != null) {
-            gc.drawImage(sprite, x, y, width, height);
+            gc.drawImage(sprite, pos.x, pos.y, width, height);
         } else {
             gc.setFill(Color.BLUE);
-            gc.fillRect(x,y,width,height);
+            gc.fillRect(pos.x, pos.y, width, height);
         }
     }
 
@@ -89,5 +101,5 @@ public class Jugador extends Entidad {
     public boolean isEnSuelo() { return enSuelo; }
     public void setVivo(boolean v) { this.vivo = v; }
     public boolean isVivo() { return vivo; }
-    public void setVelY(double v) { this.velY = v; }
+    public void setVelY(double v) { this.vel.y = v; }
 }

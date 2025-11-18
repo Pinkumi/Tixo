@@ -16,18 +16,18 @@ public class EnemigoVolador extends Enemigo {
 
     @Override
     public void update() {
-        x += velX;
-        y = baseY + Math.sin(x * 0.05) * 20;
-        if (x < -50) x = 850;
-        if (x > 850) x = -50;
+        pos.x += vel.x;
+        pos.y = baseY + Math.sin(pos.x * 0.05) * 20;
+        if (pos.x < -50) pos.x = 850;
+        if (pos.x > 850) pos.x = -50;
     }
 
     @Override
     public void draw(GraphicsContext gc) {
-        if (sprite != null) gc.drawImage(sprite, x, y, width, height);
+        if (sprite != null) gc.drawImage(sprite, pos.x, pos.y, width, height);
         else {
             gc.setFill(Color.ORANGE);
-            gc.fillOval(x,y,width,height);
+            gc.fillOval(pos.x, pos.y, width, height);
         }
     }
 }
