@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 
 public class Jugador extends Entidad {
     private double velY = 0;
+    private double velX = 0;
     private boolean enSuelo = false;
     private int puntaje = 0;
     private boolean vivo = true;
@@ -13,6 +14,7 @@ public class Jugador extends Entidad {
     private double chargePower = 0;
     private final double MAX_CHARGE = 15;
     private boolean lookingRight = true;
+
 
     public Jugador(double x, double y, double width, double height) {
         super(x,y,width,height);
@@ -28,14 +30,12 @@ public class Jugador extends Entidad {
     }
 
     public void releaseChargedJump() {
-        if (chargingJump) {
-            chargingJump = false;
-            velY = -5-chargePower;
-            // if (lookingRight) x += chargePower * 2;
-            // else x -= chargePower * 2;
-            enSuelo = false;
-            chargePower = 0;
-        }
+        chargingJump = false;
+        velY = -5-chargePower;
+        if (lookingRight) velX += chargePower * 2;
+        else velX -= chargePower * 2;
+        enSuelo = false;
+        chargePower = 0;
     }
 
     public void moverIzquierda() { 
@@ -65,7 +65,6 @@ public class Jugador extends Entidad {
     public void update() {
         if(chargingJump){
             chargePower +=0.3;
-           // System.out.println(chargePower);
             if(chargePower>MAX_CHARGE){
                 chargePower=MAX_CHARGE;
                 System.out.println(chargePower);
@@ -86,12 +85,9 @@ public class Jugador extends Entidad {
     public int getPuntaje() { return puntaje; }
     public void setPuntaje(int p) { this.puntaje = p; }
     public void addPuntaje(int v) { this.puntaje += v; }
-
     public void setEnSuelo(boolean v) { this.enSuelo = v; }
     public boolean isEnSuelo() { return enSuelo; }
-
     public void setVivo(boolean v) { this.vivo = v; }
     public boolean isVivo() { return vivo; }
-
     public void setVelY(double v) { this.velY = v; }
 }
