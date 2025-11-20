@@ -47,7 +47,7 @@ public class Jugador extends Entidad {
         acc.x += 1; 
         lookingRight = true;
     }
-    public void saltar() {  if(enSuelo) { vel.y = -10; enSuelo = false; } }
+    public void saltar() {  if(enSuelo) { vel.y = -11; enSuelo = false; } }
 
     public void applyGravity() {
         acc.y = 0.5;

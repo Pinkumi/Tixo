@@ -13,4 +13,9 @@ public class Plataforma {
         gc.fillRect(x,y,width,height);
     }
     public double getY() { return y; }
+    public double getX() { return x; }
+    public double getWidth() { return width; }
+    public double getHeight() { return height; }
+    
+    
 }

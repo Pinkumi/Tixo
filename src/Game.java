@@ -116,14 +116,18 @@ public class Game {
         for (Entidad en : entidades) en.update();
 
         // gravedad & plataformas collision for player
-       // jugador.applyGravity();
         boolean onPlatform = false;
         for (Plataforma p : plataformas) {
-            if (jugador.getBounds().intersects(p.getBounds())) {
-                jugador.landOn(p);
-                onPlatform = true;
+            if ((int)(jugador.getY()+40) <= (int)(p.getY()) && jugador.vel.y >= 0) {
+                if (jugador.getBounds().intersects(p.getBounds())) {
+                    jugador.landOn(p);
+                    onPlatform = true;
+                }
             }
         }
+        
+
+
         if (!onPlatform) jugador.setEnSuelo(false);
 
         // collisions with enemies
