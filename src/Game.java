@@ -7,11 +7,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.Scene;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import herramientas.*;
+import entidades.*;
+import plataformas.*;
 
 public class Game {
     private final Canvas canvas;
@@ -88,7 +91,8 @@ public class Game {
             jugador.saltar();
         }
         if (e.getCode() == KeyCode.Z) {
-            jugador.startChargingJump();
+            if(jugador.isEnSuelo())jugador.startChargingJump();;
+            
         }
         if (e.getCode() == KeyCode.S) {
             guardar();
@@ -97,7 +101,7 @@ public class Game {
     scene.setOnKeyReleased(e -> {
         keys.remove(e.getCode());
         if (e.getCode() == KeyCode.Z) {
-            jugador.releaseChargedJump();
+            if(jugador.isEnSuelo())jugador.releaseChargedJump();
         }
     });
 
@@ -116,15 +120,32 @@ public class Game {
         for (Entidad en : entidades) en.update();
 
         // gravedad & plataformas collision for player
-        boolean onPlatform = false;
-        for (Plataforma p : plataformas) {
-            if ((int)(jugador.getY()+40) <= (int)(p.getY()) && jugador.vel.y >= 0) {
-                if (jugador.getBounds().intersects(p.getBounds())) {
-                    jugador.landOn(p);
-                    onPlatform = true;
-                }
+boolean onPlatform = false;
+for (Plataforma p : plataformas) {
+    if (jugador.getVelX()>0) { 
+        if (jugador.getPreviousRight() <= p.getX() && jugador.getRight() >= p.getX()) {
+            if (jugador.getBounds().intersects(p.getBounds())) {
+                jugador.rebotarLateral(1, p);//izq
             }
         }
+    }
+    if (jugador.getVelX()<0) {
+        if (jugador.getPreviousLeft() >=(p.getX()+p.getWidth()) && jugador.getLeft() <= (p.getX()+p.getWidth())) {
+            if (jugador.getBounds().intersects(p.getBounds())) {
+                jugador.rebotarLateral(2, p);//der
+            }
+        }
+    }
+
+    if (jugador.getVelY()>0) {
+        if ((jugador.getPreviousBottom() <= p.getY()) &&(jugador.getBottom() >=p.getY())) {
+            if (jugador.getBounds().intersects(p.getBounds())) {
+                jugador.landOn(p);
+                onPlatform = true;
+            }
+        }
+    }
+}
         
 
 

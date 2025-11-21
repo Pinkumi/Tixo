@@ -1,7 +1,11 @@
+package entidades;
+
+import plataformas.*;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import herramientas.*;
 
 public class Jugador extends Entidad {
     private boolean enSuelo = false;
@@ -14,6 +18,9 @@ public class Jugador extends Entidad {
     private boolean lookingRight = true;
     private int jumpImpulse = 0;
     private boolean chargeJumpDirectionRight = true;
+    public double previousY;
+    public double previousX;
+
 
     public Jugador(double x, double y, double width, double height) {
         super(x,y,width,height);
@@ -24,27 +31,31 @@ public class Jugador extends Entidad {
     public void startChargingJump() {
         if (enSuelo) {
             chargingJump = true;
-            if(lookingRight) chargeJumpDirectionRight = true;
-            else chargeJumpDirectionRight = false;
+
             chargePower = 0;
         }
     }
 
     public void releaseChargedJump() {
-        chargingJump = false;
-        enSuelo = false;
-        vel.y =-(5+ chargePower);
-        if(chargeJumpDirectionRight) vel.x += chargePower*1.5;
-        else vel.x -= chargePower*1.5;
-        chargePower = 0;
+        if(enSuelo){
+            chargingJump = false;
+            enSuelo = false;
+            vel.y =-(5+ chargePower);
+            if(lookingRight)  vel.x += chargePower*1.5;
+            else vel.x -= chargePower*1.5;
+            chargePower = 0;
+        }
+
     }
 
     public void moverIzquierda() { 
-        acc.x -= 1;
+        if(enSuelo) acc.x -= 1; 
+        else acc.x -= 0.3;
         lookingRight = false;
      }
     public void moverDerecha() { 
-        acc.x += 1; 
+        if(enSuelo) acc.x += 1; 
+        else acc.x += 0.3;
         lookingRight = true;
     }
     public void saltar() {  if(enSuelo) { vel.y = -11; enSuelo = false; } }
@@ -62,7 +73,10 @@ public class Jugador extends Entidad {
 
     @Override
     public void update() {
-        
+        previousY = pos.y;
+        previousX = pos.x;
+
+
         applyGravity();
         // if (jumpImpulse > 0) {
         //     if (chargeJumpDirectionRight) acc.x += jumpImpulse;
@@ -93,7 +107,16 @@ public class Jugador extends Entidad {
             gc.fillRect(pos.x, pos.y, width, height);
         }
     }
-
+    public void rebotarLateral(int dir, Plataforma p) {
+        if (dir == 1) { 
+            pos.x = p.getX() - width; 
+        } else if (dir == 2) {
+            pos.x = p.getX() + p.getWidth();
+        }
+        vel.x = -vel.x * 0.8;
+        if(dir==1) pos.x -=1;
+        else pos.x +=1;
+    }
     public int getPuntaje() { return puntaje; }
     public void setPuntaje(int p) { this.puntaje = p; }
     public void addPuntaje(int v) { this.puntaje += v; }
@@ -102,4 +125,13 @@ public class Jugador extends Entidad {
     public void setVivo(boolean v) { this.vivo = v; }
     public boolean isVivo() { return vivo; }
     public void setVelY(double v) { this.vel.y = v; }
+    public double getBottom() { return pos.y + height; }
+    public double getPreviousBottom() { return previousY + height; }
+    public double getRight() { return pos.x + width; }
+    public double getLeft() { return pos.x; }
+    public double getPreviousRight() { return previousX + width; }
+    public double getPreviousLeft() { return previousX; }
+    public double getVelX() { return vel.x; }
+    public double getVelY() { return vel.y; }   
+
 }

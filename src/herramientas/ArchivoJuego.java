@@ -1,3 +1,5 @@
+package herramientas;
+
 import java.io.*;
 
 public class ArchivoJuego {

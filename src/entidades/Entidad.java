@@ -1,3 +1,6 @@
+package entidades;
+
+import herramientas.Vector2d;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 
