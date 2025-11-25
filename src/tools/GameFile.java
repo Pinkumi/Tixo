@@ -1,11 +1,11 @@
-package herramientas;
+package tools;
 
 import java.io.*;
 
-public class ArchivoJuego {
+public class GameFile {
     private final String ruta;
 
-    public ArchivoJuego(String ruta) {
+    public GameFile(String ruta) {
         this.ruta = ruta;
         // ensure folder exists
         File f = new File(ruta).getParentFile();

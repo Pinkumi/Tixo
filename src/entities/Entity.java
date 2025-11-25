@@ -1,16 +1,16 @@
-package entidades;
+package entities;
 
-import herramientas.Vector2d;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
+import tools.Vector2d;
 
-public abstract class Entidad {
+public abstract class Entity {
     protected double width, height;
     protected Vector2d pos;
     protected Vector2d vel;
     protected Vector2d acc;
 
-    public Entidad(double x, double y, double width, double height) {
+    public Entity(double x, double y, double width, double height) {
         this.width = width; this.height = height;
         this.pos = new Vector2d(x, y);
         this.vel = new Vector2d(0,0);

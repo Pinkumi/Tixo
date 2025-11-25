@@ -6,28 +6,31 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import platforms.*;
 import javafx.scene.Scene;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import herramientas.*;
-import entidades.*;
-import plataformas.*;
+import java.util.Iterator;
+import entities.*;
+import tools.*;
+import levels.*;
 
 public class Game {
     private final Canvas canvas;
     private final GraphicsContext gc;
     private final int width;
     private final int height;
-
-    private Jugador jugador;
-    private List<Entidad> entidades;
-    private List<Plataforma> plataformas;
+    private boolean levelCompleted = false;
+    private Player player;
+    private List<Entity> entities;
+    private List<Platform> platforms;
     private Set<KeyCode> keys = new HashSet<>();
-    private ArchivoJuego archivoJuego;
-
+    private List<Entity> items;
+    private GameFile gameFile;
+    private Level currentLevel;
+    private int currentLevelIndex;
     private AnimationTimer loop;
 
     public Game(int width, int height) {
@@ -35,32 +38,22 @@ public class Game {
         this.height = height;
         this.canvas = new Canvas(width, height);
         this.gc = canvas.getGraphicsContext2D();
+        currentLevelIndex = 1;
+        currentLevel = new Level1();
         init();
     }
 
     public Canvas getCanvas() { return canvas; }
 
     private void init() {
-        archivoJuego = new ArchivoJuego("datos/progreso.txt");
-        entidades = new ArrayList<>();
-        plataformas = new ArrayList<>();
-
-        jugador = new Jugador(50, 450, 40, 60);
-        entidades.add(jugador);
-
-        // Plataformas (suelo + dos plataformas elevadas)
-        plataformas.add(new Plataforma(0, 540, 800, 60)); // suelo
-        plataformas.add(new Plataforma(200, 420, 120, 20));
-        plataformas.add(new Plataforma(450, 350, 150, 20));
-
-        // Enemigos
-        EnemigoTerrestre et = new EnemigoTerrestre(300, 500, 40, 40, 1.5);
-        EnemigoVolador ev = new EnemigoVolador(600, 200, 40, 40, 1.2);
-
-        entidades.add(et);
-        entidades.add(ev);
-
-        // Setup loop
+        gameFile = new GameFile("datos/progreso.txt");
+        entities = new ArrayList<>();
+        platforms = new ArrayList<>();
+        items = new ArrayList<>();
+        currentLevel.init();
+        player = new Player(currentLevel.getXSpawn(), currentLevel.getYSpawn(), 40, 60);
+        //player = new Player(50, 450, 40, 60);
+        loadLevel(currentLevel);
         loop = new AnimationTimer() {
             private long last = 0;
             @Override
@@ -75,23 +68,34 @@ public class Game {
 
         // try to load previous progress
         try {
-            ArchivoJuego.Progreso p = archivoJuego.cargar();
+            GameFile.Progreso p = gameFile.cargar();
             if (p != null) {
-                jugador.setPuntaje(p.puntaje);
+                player.setScore(p.puntaje);
             }
         } catch (Exception e) {
             // ignore
         }
+    }
+    private void loadLevel(Level level) {
+        currentLevel = level;
+        currentLevel.init();
+        entities.clear();
+        platforms.clear();
+        items.clear();
+        entities.add(player);
+        entities.addAll(currentLevel.getEntities());
+        platforms.addAll(currentLevel.getPlatforms());
+        items.addAll(currentLevel.getItems());
     }
 
     public void setupInput(Scene scene) {
     scene.setOnKeyPressed(e -> {
         keys.add(e.getCode());
         if (e.getCode() == KeyCode.SPACE) {
-            jugador.saltar();
+            player.jump();
         }
         if (e.getCode() == KeyCode.Z) {
-            if(jugador.isEnSuelo())jugador.startChargingJump();;
+            if(player.isOnGround())player.startChargingJump();;
             
         }
         if (e.getCode() == KeyCode.S) {
@@ -101,7 +105,7 @@ public class Game {
     scene.setOnKeyReleased(e -> {
         keys.remove(e.getCode());
         if (e.getCode() == KeyCode.Z) {
-            if(jugador.isEnSuelo())jugador.releaseChargedJump();
+            if(player.isOnGround())player.releaseChargedJump();
         }
     });
 
@@ -111,58 +115,158 @@ public class Game {
 
     private void actualizar(double delta) {
         // input
-            if (keys.contains(KeyCode.LEFT)) jugador.moverIzquierda();
-            if (keys.contains(KeyCode.RIGHT)) jugador.moverDerecha();
-            if (keys.contains(KeyCode.SPACE)) jugador.saltar();
-      //  if (e.getCode() == KeyCode.Z) jugador.startChargingJump();
-
+        if (keys.contains(KeyCode.LEFT)) player.moveLeft();
+        if (keys.contains(KeyCode.RIGHT)) player.moveRight();
+        if (keys.contains(KeyCode.SPACE)) player.jump();
+        //if (e.getCode() == KeyCode.Z) player.startChargingJump();
+        for (Platform p:platforms){
+           // if(p.isDestroyed()) continue;
+            p.update();
+        }
         // update entities
-        for (Entidad en : entidades) en.update();
-
-        // gravedad & plataformas collision for player
-boolean onPlatform = false;
-for (Plataforma p : plataformas) {
-    if (jugador.getVelX()>0) { 
-        if (jugador.getPreviousRight() <= p.getX() && jugador.getRight() >= p.getX()) {
-            if (jugador.getBounds().intersects(p.getBounds())) {
-                jugador.rebotarLateral(1, p);//izq
-            }
-        }
-    }
-    if (jugador.getVelX()<0) {
-        if (jugador.getPreviousLeft() >=(p.getX()+p.getWidth()) && jugador.getLeft() <= (p.getX()+p.getWidth())) {
-            if (jugador.getBounds().intersects(p.getBounds())) {
-                jugador.rebotarLateral(2, p);//der
-            }
-        }
-    }
-
-    if (jugador.getVelY()>0) {
-        if ((jugador.getPreviousBottom() <= p.getY()) &&(jugador.getBottom() >=p.getY())) {
-            if (jugador.getBounds().intersects(p.getBounds())) {
-                jugador.landOn(p);
-                onPlatform = true;
-            }
-        }
-    }
-}
-        
-
-
-        if (!onPlatform) jugador.setEnSuelo(false);
+        for (Entity en : entities) en.update();
+        //Items update
+        for (Entity it : items) it.update();
+        // gravedad & platforms collision for player
+        colisionPorPlataforma();
 
         // collisions with enemies
-        for (Entidad en : entidades) {
-            if (en instanceof Enemigo) {
-                if (jugador.getBounds().intersects(en.getBounds())) {
-                    jugador.setVivo(false);
+        for (Entity en : entities) {
+            if (en instanceof Enemy) {
+                if (player.getBounds().intersects(en.getBounds())) {
+                    player.setAlive(false);
                 }
             }
         }
 
-        // remove dead or collected items if any (not implemented but placeholder)
+        for(Entity it : items){
+            if (it instanceof Door d) {
+                if (!d.isOpen()) {
+                    if (player.getBounds().intersects(d.getBounds()) && keys.contains(KeyCode.UP)) {
+                        if (player.hasKey()) {
+                            d.open();
+                        }else{
+                            System.out.println("Necesitas una llave para abrir la puerta.");
+                        }
+                    }
+                }else{
+                    if (player.getBounds().intersects(d.getBounds()) && keys.contains(KeyCode.UP)) {
+                        levelCompleted = true;
+                        
+                    }
+                }
+            }
+
+
+            else if (it instanceof Clock c) {
+                if (player.getBounds().intersects(c.getBounds())) {
+                    System.out.println("Reloj tomado");
+                    c.take();
+                    //Placeholder para el relog 
+                }
+            }else if (it instanceof Key k) {
+                if (player.getBounds().intersects(k.getBounds())) {
+                    System.out.println("Llave tomada");
+                    k.take();
+                    player.takeKey();
+                    
+                }
+            }
+
+        }
+        if (levelCompleted) {
+            goToNextLevel();
+            levelCompleted = false;
+        }
+
+        Platform p = player.getActualPlatform();
+        if (p == null) return;
+        if (!player.isOnGround()) return;
+        player.addPosX(p.getVelX());
+        player.addPosY(p.getVelY());
+
+            // remove dead or collected items if any (not implemented but placeholder)
+        removeDeadEntities();
     }
 
+    
+    private void colisionPorPlataforma() {
+        boolean onPlatform = false;
+        for (Platform p : platforms) {
+            if (p.isDestroyed()) continue;
+            if (player.getVelX()>0) { 
+                if (player.getPreviousRight() <= p.getX() && player.getRight() >= p.getX()) {
+                    if (player.getBounds().intersects(p.getBounds())) {
+                        if(p.getTipe().equals("aerea"))p.startBreaking();
+                        player.boundH(1, p);//izq
+                    }
+                }
+            }
+            if (player.getVelX()<0) {
+                if (player.getPreviousLeft() >=(p.getX()+p.getWidth()) && player.getLeft() <= (p.getX()+p.getWidth())) {
+                    if (player.getBounds().intersects(p.getBounds())) {
+                        if(p.getTipe().equals("aerea"))p.startBreaking();
+                        player.boundH(2, p);//der
+                    }
+                }
+            }
+
+            if (player.getVelY()>0) {
+                if ((player.getPreviousBottom() <= p.getY()) &&(player.getBottom() >=p.getY())) {
+                    if (player.getBounds().intersects(p.getBounds())) {
+                        if(p.getTipe().equals("aerea"))p.startBreaking();
+                        player.landOn(p);
+                        onPlatform = true;
+                    }
+                }
+            }
+            if (p.getTipe().equals("fija")) {
+                if (player.getVelY()<0) {
+                    if ((player.getY() <= p.getY()+p.getHeight()) && (player.getPreviousTop() >= p.getY()+p.getHeight())) {
+                        if (player.getBounds().intersects(p.getBounds())) {
+                            player.boundV(2, p);
+                        }
+                    }
+                }  
+                
+            }
+        }
+        if (!onPlatform) player.setOnGround(false);
+
+    }
+    private void goToNextLevel() {
+        // Placeholder for level transition logic
+        System.out.println("siguiente nivel");
+        currentLevelIndex++;
+        switch (currentLevelIndex) {
+            case 2 -> currentLevel = new Level2();
+            case 3 -> currentLevel =  new Level3();
+            default -> {
+                System.out.println("Juego completado");
+            }
+        }
+        currentLevel.init();
+        loadLevel(currentLevel);
+        player.reset();
+        player.respawn(currentLevel.getXSpawn(), currentLevel.getYSpawn());
+    }
+    private void removeDeadEntities() {
+        // Placeholder for removing dead entities if needed
+        Iterator<Entity> it = items.iterator();
+        while (it.hasNext()) {
+            Entity item = it.next();
+            if (item instanceof Clock c) {
+                if (c.isTaken()) {
+                    it.remove();
+                }
+            } else if (item instanceof Key k) {
+                if (k.isTaken()) {
+                    it.remove();
+                }
+            }
+        }
+
+    }
     private void dibujar() {
         // clear
         gc.setFill(Color.web("#1e1e1e"));
@@ -170,20 +274,23 @@ for (Plataforma p : plataformas) {
 
         // draw platforms
         gc.setFill(Color.SADDLEBROWN);
-        for (Plataforma p : plataformas) {
+        for (Platform p : platforms) {
             p.draw(gc);
         }
+        //items
+        for (Entity it : items) it.draw(gc);
+
 
         // draw entities
-        for (Entidad e : entidades) e.draw(gc);
+        for (Entity e : entities) e.draw(gc);
 
         // HUD
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font(18));
-        gc.fillText("Puntaje: " + jugador.getPuntaje(), 20, 30);
+        gc.fillText("Puntaje: " + player.getScore(), 20, 30);
         gc.fillText("Presiona 'S' para guardar", 20, 55);
 
-        if (!jugador.isVivo()) {
+        if (!player.isAlive()) {
             gc.setFill(Color.color(0,0,0,0.6));
             gc.fillRect(0, 0, width, height);
             gc.setFill(Color.WHITE);
@@ -194,7 +301,7 @@ for (Plataforma p : plataformas) {
 
     private void guardar() {
         try {
-            archivoJuego.guardar(new ArchivoJuego.Progreso(jugador.getPuntaje(), "player"));
+            gameFile.guardar(new GameFile.Progreso(player.getScore(), "player"));
         } catch (Exception e) {
             e.printStackTrace();
         }

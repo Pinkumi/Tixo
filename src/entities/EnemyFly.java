@@ -1,15 +1,15 @@
-package entidades;
+package entities;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
 
-public class EnemigoVolador extends Enemigo {
+public class EnemyFly extends Enemy {
     private double baseY;
     private Image sprite;
     
 
 
-    public EnemigoVolador(double x, double y, double width, double height, double velX) {
+    public EnemyFly(double x, double y, double width, double height, double velX) {
         super(x,y,width,height,velX);
         this.baseY = y;
         try { sprite = new Image("file:assets/images/enemy_fly.png"); } catch (Exception e) { sprite = null; }
