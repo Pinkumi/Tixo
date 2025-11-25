@@ -8,7 +8,7 @@ public class Level2 extends Level {
     @Override
     public void init() {
         xSpawn = 60;
-        ySpawn = 430;
+        ySpawn = 400;
         platforms.add(new Platform(0, 540, 800, 60));
         AerialPlatform p1 = new AerialPlatform(150, 430, 140, 20);
         p1.setVelX(2);

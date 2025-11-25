@@ -8,7 +8,7 @@ public class Level3 extends Level {
     @Override
     public void init() {
         xSpawn = 80;
-        ySpawn = 430;
+        ySpawn = 400;
         platforms.add(new Platform(0, 540, 250, 60));
         platforms.add(new Platform(350, 540, 200, 60));
         platforms.add(new Platform(600, 540, 200, 60));

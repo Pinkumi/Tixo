@@ -32,6 +32,7 @@ public class Game {
     private Level currentLevel;
     private int currentLevelIndex;
     private AnimationTimer loop;
+    
 
     public Game(int width, int height) {
         this.width = width;
@@ -51,7 +52,7 @@ public class Game {
         platforms = new ArrayList<>();
         items = new ArrayList<>();
         currentLevel.init();
-        player = new Player(currentLevel.getXSpawn(), currentLevel.getYSpawn(), 40, 60);
+        player = new Player(currentLevel.getXSpawn(), currentLevel.getYSpawn(), 80, 120);
         //player = new Player(50, 450, 40, 60);
         loadLevel(currentLevel);
         loop = new AnimationTimer() {

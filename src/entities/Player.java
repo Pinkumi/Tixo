@@ -4,6 +4,7 @@ import tools.*;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import platforms.*;
 
@@ -11,6 +12,7 @@ public class Player extends Entity {
     private boolean onGround = false;
     private int score = 0;
     private boolean alive = true;
+    private boolean dying = false;  
     private Image sprite;
     private boolean chargingJump = false;
     private double chargePower = 0;
@@ -22,11 +24,20 @@ public class Player extends Entity {
     private double XPas;
     private Platform actualPlatform;
     private boolean haveKey;
+    private Image[] sprites;
+    private int currentSprite = 0;
+    private double spriteTimer = 0;
+    private double spriteIntervalo = 0.12;
 
 
     public Player(double x, double y, double width, double height) {
         super(x,y,width,height);
         haveKey = false;
+        sprites = new Image[8];
+        Image spriteSheet = new Image("file:assets/images/playerSpriteSheet.png");
+        for (int i = 0; i < 8; i++) {
+            sprites[i] = new WritableImage(spriteSheet.getPixelReader(), i * 400, 0, 400, 600);
+        }
         try {
             sprite = new Image("file:assets/images/player.png");
         } catch (Exception e) { sprite = null; }
@@ -73,10 +84,14 @@ public class Player extends Entity {
         else acc.x += 0.3;
         lookingRight = true;
     }
-    public void jump() {  if(onGround
+    public void jump() {  
+        if(onGround) { 
+            vel.y = -11; 
+            onGround= false; 
+            chargingJump = false;
+        } 
 
-    ) { vel.y = -11; onGround
- = false; } }
+    }
 
     public void applyGravity() {
         acc.y = 0.5;
@@ -122,16 +137,42 @@ public class Player extends Entity {
             else chargePower +=0.1;System.out.println(chargePower);
             
         } 
+        updateAnimation();
+    }
+    public void updateAnimation() {
+        double delta = 1/60.0;
+        if (chargingJump) {
+            currentSprite = 3;
+            return;
+        }
+        if (!onGround) {
+            currentSprite = 2;
+            return;
+        }
+        if (Math.abs(vel.x) > 0.5) {
+            spriteTimer += delta;
+            if (spriteTimer > 0.12) {
+                spriteTimer = 0;
+                currentSprite++;
+                if (currentSprite<4 || currentSprite>7) currentSprite=4; 
+            }
+            return;
+        }
+        currentSprite = lookingRight ? 0 : 1;
     }
 
     @Override
     public void draw(GraphicsContext gc) {
-        if (sprite != null) {
-            gc.drawImage(sprite, pos.x, pos.y, width, height);
-        } else {
-            gc.setFill(Color.BLUE);
-            gc.fillRect(pos.x, pos.y, width, height);
-        }
+    Image frame = sprites[currentSprite];
+
+    if (!lookingRight) {
+        gc.save();
+        gc.scale(-1, 1);
+        gc.drawImage(frame, -pos.x - width, pos.y, (width+3), (height+3));
+        gc.restore();
+    } else {
+        gc.drawImage(frame, pos.x, pos.y, width+3, height+3);
+    }
     }
     public void boundH(int dir, Platform p) {
         if (dir == 1) { 
