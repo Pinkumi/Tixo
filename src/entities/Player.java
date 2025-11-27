@@ -27,40 +27,42 @@ public class Player extends Entity {
     private Image[] sprites;
     private int currentSprite = 0;
     private double spriteTimer = 0;
-    private double spriteIntervalo = 0.12;
+    private int lives = 5;
+    public boolean invincible;
+    private double invincibleTime = 0;
 
 
     public Player(double x, double y, double width, double height) {
         super(x,y,width,height);
         haveKey = false;
-        sprites = new Image[8];
-        Image spriteSheet = new Image("file:assets/images/playerSpriteSheet.png");
-        for (int i = 0; i < 8; i++) {
+        sprites = new Image[13];
+        invincible = false;
+        Image spriteSheet = new Image("file:assets/images/playerss.png");
+        for (int i = 0; i < 13; i++) {
             sprites[i] = new WritableImage(spriteSheet.getPixelReader(), i * 400, 0, 400, 600);
         }
         try {
             sprite = new Image("file:assets/images/player.png");
         } catch (Exception e) { sprite = null; }
         actualPlatform = null;
+
     }
     public void startChargingJump() {
-        if (onGround
-    
-        ) {
+        if(dying) return;
+        if (onGround){
+            Sound.playchargejump();
             chargingJump = true;
-
             chargePower = 0;
         }
     }
 
     public void releaseChargedJump() {
-        if(onGround
-    
-        ){
+        if(dying) return;
+        if(onGround){
+            Sound.playJump();
             chargingJump = false;
-            onGround
-     = false;
-            vel.y =-(5+ chargePower);
+            onGround= false;
+            vel.y =-(8+ chargePower);
             if(lookingRight)  vel.x += chargePower*1.5;
             else vel.x -= chargePower*1.5;
             chargePower = 0;
@@ -70,44 +72,52 @@ public class Player extends Entity {
     public boolean hasKey() { return haveKey; }
     public void takeKey() { haveKey = true; }
 
-    public void moveLeft() { 
-        if(onGround
-    
-        ) acc.x -= 1; 
+    public void moveLeft() {
+
+        if(dying) return;
+        if(chargingJump){lookingRight=false;return;}
+        if(onGround) acc.x -= 1; 
         else acc.x -= 0.3;
         lookingRight = false;
      }
     public void moveRight() { 
-        if(onGround
-    
-        ) acc.x += 1; 
+        if(dying) return;
+        if(chargingJump){lookingRight=true;return;}
+        if(onGround) acc.x += 1; 
         else acc.x += 0.3;
         lookingRight = true;
     }
-    public void jump() {  
+    public void jump() {
+        if(chargingJump){return;}
+        if(dying) return;
         if(onGround) { 
+            Sound.playJump();
             vel.y = -11; 
             onGround= false; 
             chargingJump = false;
         } 
-
     }
-
     public void applyGravity() {
+        if(dying) return;
         acc.y = 0.5;
-        if (pos.y > 1000) { alive = false; }
+        //if (pos.y > 1000) { getHit(); }
     }
 
     public void landOn(Platform p) {
         pos.y = p.getY() - height;
         vel.y = 0;
-        onGround
- = true;
+        onGround= true;
         actualPlatform = p;
     }
 
     @Override
     public void update() {
+        if (alive == false) {
+            return;
+            
+        }
+       // System.out.println(chargingJump);
+      // System.out.println(onGround);
         Ypas = pos.y;
         XPas = pos.x;
         // if (actualPlatform != null) {
@@ -129,18 +139,48 @@ public class Player extends Entity {
         else vel.x *= 0.99;
         
 
-        if (pos.x + width > 800) pos.x = 800 - width;
-        if (pos.x < 0) pos.x = 0;
+        // if (pos.x + width > 800) pos.x = 800 - width;
+        // if (pos.x < 0) pos.x = 0;
         if(chargingJump){
-        
             if(chargePower>MAX_CHARGE)chargePower=MAX_CHARGE;
             else chargePower +=0.1;System.out.println(chargePower);
             
-        } 
+        }
+        if(invincible){
+            invincibleTime -= 0.016;
+            if(invincibleTime <= 0){
+                invincible=false;
+                invincibleTime=0;
+            }
+        }
+
+
+        if(dying) {
+            vel.x = 0;
+            vel.y = 0;
+        }
+        
         updateAnimation();
+
     }
+    
     public void updateAnimation() {
         double delta = 1/60.0;
+
+        if (dying) {
+            spriteTimer += delta;
+            if (spriteTimer>0.15) {
+                spriteTimer = 0;
+                currentSprite++;
+                if (currentSprite > 12) {
+                    dying = false;
+                    alive = false;
+                }
+            }
+            return;
+        }
+        if (!alive) return;
+
         if (chargingJump) {
             currentSprite = 3;
             return;
@@ -158,22 +198,31 @@ public class Player extends Entity {
             }
             return;
         }
-        currentSprite = lookingRight ? 0 : 1;
+        currentSprite = lookingRight?0:1;
+
     }
 
     @Override
-    public void draw(GraphicsContext gc) {
-    Image frame = sprites[currentSprite];
+    public void draw(GraphicsContext gc, double camX, double camY) {
+        if (!alive && !dying) return;
+        Image frame = sprites[currentSprite];
+        if (invincible) {
+            if ((int)(invincibleTime * 10) % 2 == 0) {
+                return;
+            }
+            gc.setEffect(new javafx.scene.effect.ColorAdjust(0, 0, 0.5, 0)); 
+        }
+        if (!lookingRight) {
+            gc.save();
+            gc.scale(-1, 1);
+            gc.drawImage(frame, -((1200/2)-(width/2))-width,((800*0.7)-(height/2)), width+3,height+3);
+            gc.restore();
+        } else {
+            gc.drawImage(frame, ((1200/2) -(width/2)), ((800*0.7) - (height/2)), width+3, height+3);
+        }
+        gc.setEffect(null);
+    }
 
-    if (!lookingRight) {
-        gc.save();
-        gc.scale(-1, 1);
-        gc.drawImage(frame, -pos.x - width, pos.y, (width+3), (height+3));
-        gc.restore();
-    } else {
-        gc.drawImage(frame, pos.x, pos.y, width+3, height+3);
-    }
-    }
     public void boundH(int dir, Platform p) {
         if (dir == 1) { 
             pos.x = p.getX() - width; 
@@ -214,8 +263,18 @@ public class Player extends Entity {
         actualPlatform = null;
         setOnGround(false);
     }
+    public void kill() {
+        if (!dying && alive) {
+            dying = true;
+            Sound.playdeath();
+            // alive = true;
+            currentSprite = 8;
+            spriteTimer = 0;
+        }
+    }
     public void setAlive(boolean v) { this.alive = v; }
     public boolean isAlive() { return alive; }
+    public void setDying(boolean v) { this.dying = v; }
     public void addPosX(double v) { this.pos.x += v; }
     public void addPosY(double v) { this.pos.y += v; }
     public void setVelY(double v) { this.vel.y = v; }
@@ -228,5 +287,21 @@ public class Player extends Entity {
     public double getPreviousLeft() { return XPas; }
     public double getVelX() { return vel.x; }
     public double getVelY() { return vel.y; }   
+    public int getLives(){
+        return lives;
+    }
+    public void setLives(int l){
+        this.lives = l;
+    }
+    public void getHit(){
+        if(invincible) return;
+        lives -=1;
+        if(lives <= 0){
+            alive = false;
+        }
+        invincible = true;
+        invincibleTime=1.5;
+
+    }
 
 }

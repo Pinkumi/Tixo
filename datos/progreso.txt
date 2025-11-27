@@ -1,2 +1,4 @@
-puntaje=0
-jugador=player
+puntaje=8
+jugador=yael
+vidas=5
+level=0

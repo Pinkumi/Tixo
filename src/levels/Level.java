@@ -8,6 +8,7 @@ import platforms.*;
 public abstract class Level {
     protected int xSpawn = 0;
     protected int ySpawn = 0;
+    protected int timeLevel = 60;
     protected List<Platform> platforms = new ArrayList<>();
     protected List<Entity> entities = new ArrayList<>();
     protected List<Entity> items = new ArrayList<>();
@@ -28,6 +29,12 @@ public abstract class Level {
     }
     public int getYSpawn() {
         return ySpawn;
+    }
+    public int getTimeLevel() {
+        return timeLevel;
+    }
+    public void setTimeLevel(int timeLevel) {
+        this.timeLevel = timeLevel;
     }
 
 }

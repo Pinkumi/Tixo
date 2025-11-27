@@ -16,6 +16,8 @@ public class GameFile {
         try (FileWriter fw = new FileWriter(ruta)) {
             fw.write("puntaje=" + p.puntaje + "\n");
             fw.write("jugador=" + p.nombre + "\n");
+            fw.write("vidas=" + p.nLives + "\n");
+            fw.write("level=" + (p.idxLevel) + "\n");
         }
     }
 
@@ -24,21 +26,27 @@ public class GameFile {
         if (!file.exists()) return null;
         int puntaje = 0;
         String nombre = "player";
+        int nLives = 5;
+        int idxLevel = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith("puntaje=")) puntaje = Integer.parseInt(line.split("=")[1].trim());
                 if (line.startsWith("jugador=")) nombre = line.split("=")[1].trim();
+                if (line.startsWith("vidas=")) nLives = Integer.parseInt(line.split("=")[1].trim());
+                if (line.startsWith("level=")) idxLevel = Integer.parseInt(line.split("=")[1].trim());
             }
         }
-        return new Progreso(puntaje, nombre);
+        return new Progreso(puntaje, nombre,nLives, idxLevel);
     }
 
     public static class Progreso {
         public int puntaje;
         public String nombre;
-        public Progreso(int puntaje, String nombre) {
-            this.puntaje = puntaje; this.nombre = nombre;
+        public int nLives;
+        public int idxLevel;
+        public Progreso(int puntaje, String nombre,int nLives, int idxLevel) {
+            this.puntaje = puntaje; this.nombre = nombre;this.idxLevel = idxLevel;this.nLives = nLives;
         }
     }
 }

@@ -9,6 +9,7 @@ public class Level3 extends Level {
     public void init() {
         xSpawn = 80;
         ySpawn = 400;
+        timeLevel = 40;
         platforms.add(new Platform(0, 540, 250, 60));
         platforms.add(new Platform(350, 540, 200, 60));
         platforms.add(new Platform(600, 540, 200, 60));
@@ -23,7 +24,7 @@ public class Level3 extends Level {
         items.add(new Door(720, 260));
         items.add(new Key(120, 500));
         items.add(new Clock(520, 360));
-        entities.add(new EnemyGround(150, 500, 40, 40, 1.3));
+        entities.add(new EnemyGround(200, 500, 40, 40, 1.3));
         entities.add(new EnemyGround(550, 500, 40, 40, 1.6));
         entities.add(new EnemyFly(400, 200, 40, 40, 2.0));
     }

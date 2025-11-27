@@ -3,20 +3,10 @@
         "src"
     ],
     "java.project.referencedLibraries": [
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.media.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.swing.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.controls.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.base.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\jfx.incubator.input.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\jdk.jsobject.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.web.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\jfx.incubator.richtext.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.graphics.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx.fxml.jar",
-        "c:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\javafx-swt.jar",
+
         "C:\\Users\\ROG\\Downloads\\openjfx-25.0.1_windows-x64_bin-sdk\\javafx-sdk-25.0.1\\lib\\*.jar"
     ],
-    "jdk.runConfig.vmOptions": "--module-path \"C:/Users/ROG/Downloads/openjfx-25.0.1_windows-x64_bin-sdk/javafx-sdk-25.0.1/lib\" --add-modules javafx.controls,javafx.fxml"
+    "jdk.runConfig.vmOptions": "--module-path \"C:/Users/ROG/Downloads/openjfx-25.0.1_windows-x64_bin-sdk/javafx-sdk-25.0.1/lib\" --add-modules javafx.controls,javafx.fxml,javafx.media --enable-native-access=javafx.media\""
     
 
 }

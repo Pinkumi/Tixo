@@ -1,6 +1,8 @@
 package platforms;
 //import herramientas.*;
 
+import javafx.scene.image.Image;
+
 public class AerialPlatform extends Platform {
     private boolean breaking = false;
     private long breakingTime = 0;
@@ -8,11 +10,15 @@ public class AerialPlatform extends Platform {
     private int maxSlide = 100;
     private final double initialX;
     private final double initialY;
+    
     public AerialPlatform(double x, double y, double width, double height) {
         super(x, y, width, height);
         this.tipo = "aerea";
         this.initialX = x;
         this.initialY = y;
+        try { sprite = new Image("file:assets/images/PlatAerea.png"); } catch (Exception e) { sprite = null; }
+        try { brokenSprite = new Image("file:assets/images/PlatRota.png"); } catch (Exception e) { brokenSprite = null; }
+        
     }
     public void setVelX(double velX) {
         this.vel.x = velX;

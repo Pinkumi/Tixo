@@ -18,7 +18,7 @@ public abstract class Entity {
     }
 
     public abstract void update();
-    public abstract void draw(GraphicsContext gc);
+    public abstract void draw(GraphicsContext gc,double camX, double camY);
 
     public Rectangle2D getBounds() {
         return new Rectangle2D(pos.x, pos.y, width, height);
